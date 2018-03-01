@@ -258,7 +258,8 @@ static inline int fsync (int fd)
 	DRIVER_ADD_COMMAND(bab) \
 	DRIVER_ADD_COMMAND(minion) \
 	DRIVER_ADD_COMMAND(sp10) \
-	DRIVER_ADD_COMMAND(sp30)
+	DRIVER_ADD_COMMAND(sp30) \
+	DRIVER_ADD_COMMAND(bitmineT2)
 
 #define DRIVER_PARSE_COMMANDS(DRIVER_ADD_COMMAND) \
 	FPGA_PARSE_COMMANDS(DRIVER_ADD_COMMAND) \
@@ -272,6 +273,14 @@ enum drv_driver {
 	DRIVER_PARSE_COMMANDS(DRIVER_ENUM)
 	DRIVER_MAX
 };
+
+extern bool g_logfile_enable;
+extern char g_logfile_path[256];
+extern char g_logfile_openflag[32];
+extern FILE * g_logwork_file;
+extern FILE * g_logwork_files[65];
+extern FILE * g_logwork_diffs[65];
+extern int g_logwork_asicnum;
 
 /* Use DRIVER_PARSE_COMMANDS to generate extern device_drv prototypes */
 DRIVER_PARSE_COMMANDS(DRIVER_PROTOTYPE)
@@ -981,6 +990,7 @@ struct pool;
 #define API_MCAST_ADDR "224.0.0.75"
 
 extern bool opt_work_update;
+extern bool opt_diff_update;
 extern bool opt_protocol;
 extern bool have_longpoll;
 extern char *opt_kernel_path;
@@ -1482,6 +1492,7 @@ extern bool test_nonce(struct work *work, uint32_t nonce);
 extern bool test_nonce_diff(struct work *work, uint32_t nonce, double diff);
 extern bool submit_tested_work(struct thr_info *thr, struct work *work);
 extern bool submit_nonce(struct thr_info *thr, struct work *work, uint32_t nonce);
+extern bool submit_nonce_direct(struct thr_info *thr, struct work *work, uint32_t nonce);
 extern bool submit_noffset_nonce(struct thr_info *thr, struct work *work, uint32_t nonce,
 			  int noffset);
 extern int share_work_tdiff(struct cgpu_info *cgpu);
@@ -1614,5 +1625,6 @@ extern struct api_data *api_add_avg(struct api_data *root, char *name, float *da
 extern void dupalloc(struct cgpu_info *cgpu, int timelimit);
 extern void dupcounters(struct cgpu_info *cgpu, uint64_t *checked, uint64_t *dups);
 extern bool isdupnonce(struct cgpu_info *cgpu, struct work *work, uint32_t nonce);
+void Xhash(void *state, const void *input);
 
 #endif /* __MINER_H__ */

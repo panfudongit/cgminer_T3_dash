@@ -43,3 +43,54 @@ unsigned short crc16(const unsigned char *buffer, int len)
 
 	return crc;
 }
+const unsigned short wCRCTalbeAbs[] =
+{
+	0x0000, 0xCC01, 0xD801, 0x1400,
+	0xF001, 0x3C00, 0x2800, 0xE401,
+	0xA001, 0x6C00, 0x7800, 0xB401,
+	0x5000, 0x9C01, 0x8801, 0x4400,
+};
+
+const unsigned short wCRCTalbeAbss[] ={
+0x0000, 0xCC01, 0xD801, 0x1400, 0xF001, 0x3C00, 0x2800, 0xE401, 0xA001, 0x6C00,
+0x7800, 0xB401, 0x5000, 0x9C01, 0x8801, 0x4400,};
+
+unsigned short CRC16_2(unsigned char* pchMsg, unsigned short wDataLen)
+{
+	volatile unsigned short wCRC = 0xFFFF;
+	unsigned short i;
+	unsigned char chChar;
+
+	for (i = 0; i < wDataLen; i++)
+	{
+		chChar = *pchMsg++;
+		wCRC = wCRCTalbeAbs[(chChar ^ wCRC) & 15] ^ (wCRC >> 4);
+		wCRC = wCRCTalbeAbs[((chChar >> 4) ^ wCRC) & 15] ^ (wCRC >> 4);
+	}
+
+	return wCRC;
+}
+
+unsigned short CRC16_T2(unsigned char* pchMsg, unsigned short wDataLen)
+{
+	unsigned short wCRC = 0xFFFF;
+	unsigned short i;
+	unsigned char chChar;
+	unsigned short len = wDataLen / 2;
+	unsigned char *tmp;
+	unsigned short src[32];
+
+	for(i = 0; i < len; i++)
+	{
+		src[i] = ((((unsigned short)pchMsg[2* i]) << 8) & 0xff00) | ((unsigned short)pchMsg[2*i + 1] & 0x00ff);
+	}
+	tmp = (unsigned char*)src;
+	for (i = 0; i < wDataLen; i++)
+	{
+		chChar = tmp[i];
+		wCRC = wCRCTalbeAbss[(chChar ^ wCRC) & 15] ^ (wCRC >> 4);
+		wCRC = wCRCTalbeAbss[((chChar >> 4) ^ wCRC) & 15] ^ (wCRC >> 4);
+	}
+	return wCRC;
+}
+

@@ -19,5 +19,7 @@
 #define _CRC_H_
 
 unsigned short crc16(const unsigned char *buffer, int len);
+unsigned short CRC16_T2(unsigned char* pchMsg, unsigned short wDataLen);
+unsigned short CRC16_2(unsigned char* pchMsg, unsigned short wDataLen);
 
 #endif	/* _CRC_H_ */

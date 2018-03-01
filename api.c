@@ -25,6 +25,7 @@
 #include "miner.h"
 #include "util.h"
 #include "klist.h"
+#include "T2-common.h"
 
 #if defined(USE_BFLSC) || defined(USE_AVALON) || defined(USE_AVALON2) || defined(USE_AVALON4) || \
   defined(USE_HASHFAST) || defined(USE_BITFURY) || defined(USE_BITFURY16) || defined(USE_BLOCKERUPTER) || defined(USE_KLONDIKE) || \
@@ -32,7 +33,7 @@
 	defined(USE_MINION) || defined(USE_COINTERRA) || defined(USE_BITMINE_A1) || \
 	defined(USE_ANT_S1) || defined(USE_ANT_S2) || defined(USE_ANT_S3) || defined(USE_SP10) || \
 	defined(USE_SP30) || defined(USE_ICARUS) || defined(USE_HASHRATIO) || defined(USE_AVALON_MINER) || \
-	defined(USE_AVALON7)
+	defined(USE_AVALON7) || defined(USE_BITMINE_T2) || defined(USE_BITMINE_T3)
 #define HAVE_AN_ASIC 1
 #endif
 
@@ -199,6 +200,10 @@ static const char *DEVICECODE = ""
 #endif
 #ifdef USE_BITMINE_A1
 			"BA1 "
+#endif
+
+#ifdef USE_BITMINE_T2
+			"BT2 "
 #endif
 #ifdef USE_ICARUS
 			"ICA "
@@ -2152,6 +2157,8 @@ static void pgastatus(struct io_data *io_data, int pga, bool isjson, bool precom
 }
 #endif
 
+extern struct T2_chain *chain[ASIC_CHAIN_NUM];
+
 static void devstatus(struct io_data *io_data, __maybe_unused SOCKETTYPE c, __maybe_unused char *param, bool isjson, __maybe_unused char group)
 {
 	bool io_open = false;
@@ -2198,6 +2205,48 @@ static void devstatus(struct io_data *io_data, __maybe_unused SOCKETTYPE c, __ma
 	}
 #endif
 
+	if (isjson && io_open)
+		io_close(io_data);
+}
+
+static void chipstatus(struct io_data *io_data, __maybe_unused SOCKETTYPE c, __maybe_unused char *param, bool isjson, __maybe_unused char group)
+{
+
+	struct api_data *root = NULL;
+	bool io_open;
+	int numasc = 0;
+	int chipnum=0;
+	int i, j;
+	char tmp_buf[24];
+
+	message(io_data, MSG_VERSION, 0, NULL, isjson);
+	io_open = io_add(io_data, isjson ? COMSTR JSON_VERSION : _VERSION COMSTR);
+
+	numasc = numascs();
+
+	if ( numasc == 0) {
+		message(io_data, MSG_NODEVS, 0, NULL, isjson);
+		return;
+	}
+
+	for (i = 0; i < numasc; i++)
+	{
+
+		chipnum = chain[i]->num_active_chips;
+		root = api_add_int(root, "ASC", &i, false);
+
+		root = api_add_uint(root, "Work Pll", &chain[i]->pll, false);
+		for(j=0; j<chipnum; j++)
+		{
+			sprintf(tmp_buf, "%d_accept", j);
+			root = api_add_uint(root, tmp_buf, &chain[i]->chips[j].nonces_found, false);
+
+			sprintf(tmp_buf, "%d_hw_errors", j);
+			root = api_add_uint(root, tmp_buf, &chain[i]->chips[j].hw_errors, false);
+		}
+	}
+
+	root = print_data(io_data, root, isjson, false);
 	if (isjson && io_open)
 		io_close(io_data);
 }
@@ -4022,6 +4071,7 @@ struct CMDS {
 	{ "version",		apiversion,	false,	true },
 	{ "config",		minerconfig,	false,	true },
 	{ "devs",		devstatus,	false,	true },
+	{ "chips",		chipstatus,	false,	true },
 	{ "edevs",		edevstatus,	false,	true },
 	{ "pools",		poolstatus,	false,	true },
 	{ "summary",		summary,	false,	true },

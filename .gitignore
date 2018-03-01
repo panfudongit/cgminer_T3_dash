@@ -35,6 +35,7 @@ compat/jansson-2.9/src/jansson_config.h
 compat/jansson-2.9/src/libjansson.la
 compat/jansson-2.9/stamp-h1
 compat/jansson-2.9/test-driver
+compat/jansson-2.9/libtool
 lib/.deps/
 lib/Makefile
 lib/arg-nonnull.h
@@ -43,6 +44,7 @@ lib/libgnu.a
 lib/signal.h
 lib/string.h
 lib/warn-on-use.h
+x11/libx11.a
 missing
 stamp-h1
 

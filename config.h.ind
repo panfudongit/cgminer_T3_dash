@@ -367,6 +367,9 @@
 /* Defined to 1 if Bitmine A1 support is wanted */
 #undef USE_BITMINE_A1
 
+/* Defined to 1 if Bitmine T2 support is wanted */
+#undef USE_BITMINE_T3
+
 /* Defined to 1 if BlockErupter support is wanted */
 #undef USE_BLOCKERUPTER
 

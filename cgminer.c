@@ -143,6 +143,8 @@ struct strategies strategies[] = {
 static char packagename[256];
 
 bool opt_work_update;
+bool opt_diff_update;
+
 bool opt_protocol;
 static struct benchfile_layout {
 	int length;
@@ -338,6 +340,11 @@ static bool usb_polling;
 static bool polling_usb;
 static bool usb_reinit;
 #endif
+
+FILE * g_logwork_file = NULL;
+FILE * g_logwork_files[65] = {0};
+FILE * g_logwork_diffs[65] = {0};
+int g_logwork_asicnum = 0;
 
 //for A4
 int opt_A1Pll1=120; // -1 Default
@@ -1306,6 +1313,35 @@ static struct opt_table opt_config_table[] = {
 	OPT_WITH_ARG("--api-host",
 		     opt_set_charp, NULL, &opt_api_host,
 		     "Specify API listen address, default: 0.0.0.0"),
+#ifdef USE_BITMINE_T2
+	OPT_WITH_ARG("--T2pll1",
+		     set_int_1_to_65535, opt_show_intval, &opt_A1Pll1,
+		     "Port number of miner API"),
+	OPT_WITH_ARG("--T2pll2",
+		     set_int_1_to_65535, opt_show_intval, &opt_A1Pll2,
+		     "Port number of miner API"),
+	OPT_WITH_ARG("--T2pll3",
+		     set_int_1_to_65535, opt_show_intval, &opt_A1Pll3,
+		     "Port number of miner API"),
+	OPT_WITH_ARG("--T2pll4",
+		     set_int_1_to_65535, opt_show_intval, &opt_A1Pll4,
+		     "Port number of miner API"),
+#endif
+#ifdef USE_BITMINE_T3
+		OPT_WITH_ARG("--T2pll1",
+				 set_int_1_to_65535, opt_show_intval, &opt_A1Pll1,
+				 "Port number of miner API"),
+		OPT_WITH_ARG("--T2pll2",
+				 set_int_1_to_65535, opt_show_intval, &opt_A1Pll2,
+				 "Port number of miner API"),
+		OPT_WITH_ARG("--T2pll3",
+				 set_int_1_to_65535, opt_show_intval, &opt_A1Pll3,
+				 "Port number of miner API"),
+		OPT_WITH_ARG("--T2pll4",
+				 set_int_1_to_65535, opt_show_intval, &opt_A1Pll4,
+				 "Port number of miner API"),
+#endif
+
 #ifdef USE_ICARUS
 	OPT_WITH_ARG("--au3-freq",
 		     set_float_100_to_250, &opt_show_floatval, &opt_au3_freq,
@@ -3646,6 +3682,8 @@ share_result(json_t *val, json_t *res, json_t *err, const struct work *work,
 			applog(LOG_NOTICE, "Rejected %s %s %d %s%s %s%s",
 			       hashshow, cgpu->drv->name, cgpu->device_id, where, reason, resubmit ? "(resubmit)" : "", worktime);
 			sharelog(disposition, work);
+			if(memcmp(reason, "unknown-work", 12))
+				restart_threads();
 		}
 
 		/* Once we have more than a nominal amount of sequential rejects,
@@ -4359,6 +4397,15 @@ static void __kill_work(void)
 	thr = &control_thr[usbres_thr_id];
 	kill_timeout(thr);
 #endif
+	forcelog(LOG_INFO, "Power down");
+	int ret = access("/sys/class/gpio/gpio115", F_OK); //power enable
+	if(ret == -1)//file not exist
+	{
+		system("echo 115 > /sys/class/gpio/export");
+		system("echo out > /sys/class/gpio/gpio115/direction");
+	}
+	system("echo 0 > /sys/class/gpio/gpio115/value");
+
 
 }
 
@@ -7805,6 +7852,18 @@ bool submit_nonce(struct thr_info *thr, struct work *work, uint32_t nonce)
 	return true;
 }
 
+bool submit_nonce_direct(struct thr_info *thr, struct work *work, uint32_t nonce)
+{
+
+    struct work *work_out;
+    uint32_t *work_nonce = (uint32_t *)(work->data + 64 + 12);
+    *work_nonce = htole32(nonce);
+
+    work_out = copy_work(work);
+    submit_work_async(work_out);
+    return true;
+}
+
 /* Allows drivers to submit work items where the driver has changed the ntime
  * value by noffset. Must be only used with a work protocol that does not ntime
  * roll itself intrinsically to generate work (eg stratum). We do not touch
@@ -9117,6 +9176,16 @@ static void clean_up(bool restarting)
 
 /* Should all else fail and we're unable to clean up threads due to locking
  * issues etc, just silently exit. */
+
+int BinToHexStr(char *pStr, unsigned char *data, int len)
+{
+    int i;
+    int sigLen=0;
+    for(i=0; i<len; i++)
+        sigLen+=sprintf(pStr+sigLen,"%02X",data[i]);
+    return sigLen;
+}
+
 static void *killall_thread(void __maybe_unused *arg)
 {
 	pthread_detach(pthread_self());
@@ -10276,6 +10345,10 @@ begin_bench:
 		if (opt_work_update)
 			signal_work_update();
 		opt_work_update = false;
+
+		if(opt_diff_update)
+			restart_threads();
+		opt_diff_update = false;
 
 		mutex_lock(stgd_lock);
 		ts = __total_staged();

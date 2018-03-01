@@ -668,6 +668,8 @@ HAS_BLOCKERUPTER_FALSE
 HAS_BLOCKERUPTER_TRUE
 HAS_BITMINE_A1_FALSE
 HAS_BITMINE_A1_TRUE
+HAS_BITMINE_T3_FALSE
+HAS_BITMINE_T3_TRUE
 HAS_BITFURY16_FALSE
 HAS_BITFURY16_TRUE
 HAS_BITFURY_FALSE
@@ -945,6 +947,7 @@ enable_bitforce
 enable_bitfury
 enable_bitfury16
 enable_bitmine_A1
+enable_bitmine_T3
 enable_blockerupter
 enable_cointerra
 enable_drillbit
@@ -1631,6 +1634,8 @@ Optional Features:
   --enable-bitfury16      Compile support for BitFury 16nm ASICs
                           STANDALONE(default disabled)
   --enable-bitmine_A1     Compile support for Bitmine.ch A1 ASICs
+                          STANDALONE(default disabled)
+  --enable-bitmine_T3     Compile support for Ltcmine.ch T3 ASICs
                           STANDALONE(default disabled)
   --enable-blockerupter   Compile support for BlockErupter BROKEN DRIVER
                           (default disabled)
@@ -9252,7 +9257,28 @@ else
   HAS_BITMINE_A1_FALSE=
 fi
 
+bitmine_T3="no"
 
+# Check whether --enable-bitmine_T3 was given.
+if test "${enable_bitmine_T3+set}" = set; then :
+  enableval=$enable_bitmine_T3; bitmine_T3=$enableval
+
+fi
+
+if test "x$bitmine_T3" = xyes; then
+
+$as_echo "#define USE_BITMINE_T3 1" >>confdefs.h
+
+        drivercount=x$drivercount
+        standalone="yes"
+fi
+ if test x$bitmine_T3 = xyes; then
+  HAS_BITMINE_T3_TRUE=
+  HAS_BITMINE_T3_FALSE='#'
+else
+  HAS_BITMINE_T3_TRUE='#'
+  HAS_BITMINE_T3_FALSE=
+fi
 
 blockerupter="no"
 
@@ -10731,7 +10757,7 @@ _ACEOF
 
 
 
-ac_config_files="$ac_config_files Makefile compat/Makefile ccan/Makefile lib/Makefile"
+ac_config_files="$ac_config_files Makefile compat/Makefile ccan/Makefile lib/Makefile x11/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -10964,6 +10990,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAS_BITMINE_A1_TRUE}" && test -z "${HAS_BITMINE_A1_FALSE}"; then
   as_fn_error $? "conditional \"HAS_BITMINE_A1\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAS_BITMINE_T3_TRUE}" && test -z "${HAS_BITMINE_T3_FALSE}"; then
+  as_fn_error $? "conditional \"HAS_BITMINE_T3\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAS_BLOCKERUPTER_TRUE}" && test -z "${HAS_BLOCKERUPTER_FALSE}"; then
@@ -12679,7 +12709,7 @@ else
 fi
 
 #Add any new device to this, along with a no on the end of the test
-if test "x$avalon$avalon2$avalon4$avalon7$avalon_miner$bab$bflsc$bitforce$bitfury$bitfury16$blockerupter$hashfast$hashratio$icarus$klondike$knc$modminer$drillbit$minion$cointerra$bitmine_A1$ants1$ants2$ants3$sp10$sp30" = xnononononononononononononononononononononononononono; then
+if test "x$avalon$avalon2$avalon4$avalon7$avalon_miner$bab$bflsc$bitforce$bitfury$bitfury16$blockerupter$hashfast$hashratio$icarus$klondike$knc$modminer$drillbit$minion$cointerra$bitmine_A1$bitmine_T3$ants1$ants2$ants3$sp10$sp30" = xnononononononononononononononononononononononononono; then
 	echo
 	as_fn_error $? "No mining devices configured in" "$LINENO" 5
 	echo
