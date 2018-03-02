@@ -1,9 +1,6 @@
 .d*/
 *.o
 *.lo
-Makefile
-Make*.in
-Ma*file
 
 compi*e
 confi*.guess
@@ -15,6 +12,18 @@ confi*.sub
 confi*ure
 depco*p
 instal*-sh
+
+Makefile.in
+ccan/Makefile.in
+compat/Makefile.in
+compat/jansson-2.9/Makefile.in
+compat/jansson-2.9/doc/Makefile.in
+compat/jansson-2.9/src/Makefile.in
+compat/jansson-2.9/test/Makefile.in
+compat/jansson-2.9/test/bin/Makefile.in
+compat/jansson-2.9/test/suites/Makefile.in
+compat/jansson-2.9/test/suites/api/Makefile.in
+lib/Makefile.in
 
 aclocal.m4
 autom4te.cache/
