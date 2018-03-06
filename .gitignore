@@ -25,6 +25,18 @@ compat/jansson-2.9/test/suites/Makefile.in
 compat/jansson-2.9/test/suites/api/Makefile.in
 lib/Makefile.in
 
+Makefile
+ccan/Makefile
+compat/Makefile
+compat/jansson-2.9/Makefile
+compat/jansson-2.9/doc/Makefile
+compat/jansson-2.9/src/Makefile
+compat/jansson-2.9/test/Makefile
+compat/jansson-2.9/test/bin/Makefile
+compat/jansson-2.9/test/suites/Makefile
+compat/jansson-2.9/test/suites/api/Makefile
+x11/Makefile
+
 aclocal.m4
 autom4te.cache/
 build.sh

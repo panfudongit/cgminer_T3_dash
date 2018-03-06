@@ -12666,6 +12666,12 @@ else
 	echo "  Bitmine-A1.ASICs.....: Disabled"
 fi
 
+if test "x$bitmine_T3" = xyes; then
+	echo "  Bitmine-T3.ASICs.....: Enabled"
+else
+	echo "  Bitmine-T3.ASICs.....: Disabled"
+fi
+
 if test "x$drillbit" = xyes; then
 	echo "  Drillbit.BitFury.....: Enabled"
 else
